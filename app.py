@@ -90,15 +90,27 @@ if st.session_state.schedule:
 
     # ======= DOWNLOAD BUTTON =======
     to_export = df_sorted.drop(columns=['start', 'end'])
-    buffer = BytesIO()
+    
+buffer = BytesIO()
+import io
+
+buffer = io.BytesIO()
+
+df = pd.DataFrame(st.session_state.schedule)  # 👈 ดึงตารางรายการจาก session
+
+to_export = df  # 👈 กำหนด DataFrame ที่จะ export
+
+if not to_export.empty:
     with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
         to_export.to_excel(writer, index=False, sheet_name="NextStep_Schedule")
-        writer.save()
-        st.download_button(
-            label="📥 ดาวน์โหลดตาราง Excel",
-            data=buffer,
-            file_name="schedule_nextstep.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
+
+    buffer.seek(0)
+
+    st.download_button(
+        label="📥 ดาวน์โหลดตาราง Excel",
+        data=buffer,
+        file_name="schedule_nextstep.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 else:
     st.info("กรุณาเพิ่มรายการเพื่อเริ่มต้นจัดผัง")
